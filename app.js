@@ -1,30 +1,43 @@
-const express = require('express');
-const { google } = require('googleapis');
-const app = express();
-const port = 3000;
+const express = require("express");
+const { google } = require("googleapis");
+require("dotenv").config();
 
-const spreadsheetId =  '1wH2TCkWvg6FT65yLsH2Xg-7wAOjIcRgHkHOpw4DNvaM'
+const app = express();
+const port = 5000;
+
+const spreadsheetId = process.env.SPREADSHEET_ID;
+// const auth = new google.auth.GoogleAuth({
+//   keyFile: "credenciales.json",
+//   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+// });
+
+console.log(process.env.CLIENT_EMAIL);
+
 const auth = new google.auth.GoogleAuth({
-  keyFile: 'credenciales.json',
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  credentials: {
+    client_email: process.env.CLIENT_EMAIL,
+    private_key: process.env.PRIVATE_KEY,
+  },
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
-const sheets = google.sheets({ version: 'v4', auth });
+const sheets = google.sheets({ version: "v4", auth });
 app.use(express.json());
 
-async function endpointGetSimpleEntity(entityName,req,res){
+async function endpointGetSimpleEntity(entityName, req, res) {
   try {
     const response = await getSimpleEntity(entityName);
     res.json(formatRawResponse(response.data.values));
   } catch (error) {
     console.log(error.message);
-    
-    res.status(500).send('Hubo un error al obtener los datos');
+
+    res.status(500).send("Hubo un error al obtener los datos");
   }
 }
 
- async function getSimpleEntity(entityName){
-  if(entityName == null) throw new Error("El nombre de la entidad no puede ser nulo.")
+async function getSimpleEntity(entityName) {
+  if (entityName == null)
+    throw new Error("El nombre de la entidad no puede ser nulo.");
   return sheets.spreadsheets.values.get({
     spreadsheetId,
     range: entityName,
@@ -34,63 +47,61 @@ async function endpointGetSimpleEntity(entityName,req,res){
     cambia [[key,key],[value,value]] por [{key:value}]
  * 
  */
-function formatRawResponse(data){
+function formatRawResponse(data) {
   // Extrae los nombres de las claves (el primer elemento del array)
-const keys = data.shift();
+  const keys = data.shift();
 
-// Mapea el resto de los elementos del array a objetos
-const objects = data.map(item => {
-  let obj = {};
-  keys.forEach((key, i) => {
-    // Si la clave es 'id', convierte el valor a un número
-    obj[key] = key === 'id' ? Number(item[i]) : item[i];
+  // Mapea el resto de los elementos del array a objetos
+  const objects = data.map((item) => {
+    let obj = {};
+    keys.forEach((key, i) => {
+      // Si la clave es 'id', convierte el valor a un número
+      obj[key] = key === "id" ? Number(item[i]) : item[i];
+    });
+    return obj;
   });
-  return obj;
-});
-return objects;
+  return objects;
 }
 
-app.post('/persona', async(req, res) => {
-  // Asume que el cuerpo de la solicitud es un objeto JSON con las propiedades 
+app.post("/persona", async (req, res) => {
+  // Asume que el cuerpo de la solicitud es un objeto JSON con las propiedades
   const { nombre } = req.body;
 
   const response = await getSimpleEntity();
-   // Obtiene el último ID utilizado
-   const lastId = response.data.values.pop()[0]; // Asume que el ID está en la columna A
+  // Obtiene el último ID utilizado
+  const lastId = response.data.values.pop()[0]; // Asume que el ID está en la columna A
 
-   // Incrementa el último ID para obtener el nuevo ID
-   const newId = parseInt(lastId, 10) + 1;
+  // Incrementa el último ID para obtener el nuevo ID
+  const newId = parseInt(lastId, 10) + 1;
 
-   // Crea los nuevos datos a escribir
-   const data = [newId, nombre];
-
+  // Crea los nuevos datos a escribir
+  const data = [newId, nombre];
 
   try {
     await sheets.spreadsheets.values.append({
-      spreadsheetId,  
-      range: 'Persona',
+      spreadsheetId,
+      range: "Persona",
       valueInputOption: "USER_ENTERED",
       resource: {
-        values: [data]
-      }
+        values: [data],
+      },
     });
-    res.status(200).send('Datos escritos exitosamente');
+    ñ;
+    res.status(200).send("Datos escritos exitosamente");
   } catch (error) {
     console.log(error);
-    res.status(500).send('Hubo un error al escribir los datos');
+    res.status(500).send("Hubo un error al escribir los datos");
   }
 });
 
+const simpleEntityNames = ["persona", "instrumento"];
 
-const simpleEntityNames = ["persona","instrumento"]
-
-simpleEntityNames.forEach(miEntity=>{
+simpleEntityNames.forEach((miEntity) => {
   app.get(`/${miEntity}`, async (req, res) => {
-    await endpointGetSimpleEntity(miEntity,req,res)
-   });
-},app)
+    await endpointGetSimpleEntity(miEntity, req, res);
+  });
+}, app);
 
-
-app.listen(port, () => {
+app.listen(process.env.port || port, () => {
   console.log(`Aplicación escuchando en http://localhost:${port}`);
 });
