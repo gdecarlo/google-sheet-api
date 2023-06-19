@@ -11,8 +11,6 @@ const spreadsheetId = process.env.SPREADSHEET_ID;
 //   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 // });
 
-console.log(process.env.CLIENT_EMAIL);
-
 const auth = new google.auth.GoogleAuth({
   credentials: {
     client_email: process.env.CLIENT_EMAIL,
@@ -102,6 +100,8 @@ simpleEntityNames.forEach((miEntity) => {
   });
 }, app);
 
-app.listen(process.env.port || port, () => {
-  console.log(`Aplicación escuchando en http://localhost:${port}`);
+app.listen(process.env.PORT || port, () => {
+  console.log(
+    `Aplicación escuchando en http://localhost:${process.env.PORT || port}`
+  );
 });
