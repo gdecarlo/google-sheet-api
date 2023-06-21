@@ -11,10 +11,17 @@ const spreadsheetId = process.env.SPREADSHEET_ID;
 //   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 // });
 
+//const aux_private_key = process.env.PRIVATE_KEY.replace(/\\n/g, "\n")
+
+const aux_private_key = `-----BEGIN PRIVATE KEY-----
+${process.env.PRIVATE_KEY.replace(/\\n/g, "\n")}
+-----END PRIVATE KEY-----`;
+
+console.log(aux_private_key);
 const auth = new google.auth.GoogleAuth({
   credentials: {
     client_email: process.env.CLIENT_EMAIL,
-    private_key: process.env.PRIVATE_KEY,
+    private_key: aux_private_key,
   },
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
