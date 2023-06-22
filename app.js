@@ -1,5 +1,6 @@
 const express = require("express");
 const { google } = require("googleapis");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -12,19 +13,23 @@ const spreadsheetId = process.env.SPREADSHEET_ID;
 // });
 
 // const aux_private_key = process.env.PRIVATE_KEY.replace(/\\n/g, "\n")
-const aux_private_key = process.env.PRIVATE_KEY.split(String.raw`\n`).join('\n')
-
+// let aux_private_key = process.env.PRIVATE_KEY.split(String.raw`\n`).join('\n')
+let aux_private_key = ""
+let  sheets = null;
 console.log(aux_private_key);
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.CLIENT_EMAIL,
-    private_key: aux_private_key,
-  },
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-});
 
-const sheets = google.sheets({ version: "v4", auth });
-app.use(express.json());
+function initAuth(){
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.CLIENT_EMAIL,
+      private_key: aux_private_key,
+    },
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+  
+  sheets = google.sheets({ version: "v4", auth });
+  app.use(express.json());
+}
 
 async function endpointGetSimpleEntity(entityName, req, res) {
   try {
@@ -104,8 +109,17 @@ simpleEntityNames.forEach((miEntity) => {
   });
 }, app);
 
-app.listen(process.env.PORT || port, () => {
+
+const getSecret = async ()=>{
+  const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
+  aux_private_key =  resultado.data.private_key;
+}
+
+app.listen(process.env.PORT || port, async () => {
   console.log(
     `Aplicación escuchando en http://localhost:${process.env.PORT || port}`
   );
+
+  await getSecret();
+  initAuth();
 });
