@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const app = express();
 const port = 5000;
-
+app.use(express.json());
 const spreadsheetId = process.env.SPREADSHEET_ID;
 // const auth = new google.auth.GoogleAuth({
 //   keyFile: "credenciales.json",
@@ -16,7 +16,7 @@ const spreadsheetId = process.env.SPREADSHEET_ID;
 // let aux_private_key = process.env.PRIVATE_KEY.split(String.raw`\n`).join('\n')
 let aux_private_key = ""
 let  sheets = null;
-console.log(aux_private_key);
+
 
 function initAuth(){
   const auth = new google.auth.GoogleAuth({
@@ -28,7 +28,7 @@ function initAuth(){
   });
   
   sheets = google.sheets({ version: "v4", auth });
-  app.use(express.json());
+ 
 }
 
 async function endpointGetSimpleEntity(entityName, req, res) {
@@ -122,4 +122,5 @@ app.listen(process.env.PORT || port, async () => {
 
   await getSecret();
   initAuth();
+  console.log(sheets.spreadsheets);
 });
