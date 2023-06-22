@@ -28,6 +28,7 @@ function initAuth(){
   });
   
   sheets = google.sheets({ version: "v4", auth });
+  console.log(sheets);
  
 }
 
