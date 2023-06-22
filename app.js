@@ -45,6 +45,7 @@ async function endpointGetSimpleEntity(entityName, req, res) {
 }
 
 async function getSimpleEntity(entityName) {
+  console.log(sheets);
   if (entityName == null)
     throw new Error("El nombre de la entidad no puede ser nulo.");
   return sheets.spreadsheets.values.get({
