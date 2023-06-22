@@ -96,7 +96,7 @@ app.post("/persona", async (req, res) => {
         values: [data],
       },
     });
-    ñ;
+    
     res.status(200).send("Datos escritos exitosamente");
   } catch (error) {
     console.log(error);
@@ -119,12 +119,16 @@ const getSecret = async ()=>{
   console.log(aux_private_key);
 }
 
-app.listen(process.env.PORT || port, async () => {
-  console.log(
-    `Aplicación escuchando en http://localhost:${process.env.PORT || port}`
-  );
-
-  await getSecret();
+getSecret().then(()=>{
   initAuth();
   console.log(sheets.spreadsheets);
+  
+  app.listen(process.env.PORT || port, async () => {
+    console.log(
+      `Aplicación escuchando en http://localhost:${process.env.PORT || port}`
+    );
+  
+  
+  });
 });
+
