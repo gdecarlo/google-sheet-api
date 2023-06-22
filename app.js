@@ -18,20 +18,26 @@ let aux_private_key = ""
 let  sheets = null;
 
 
-function initAuth(){
-  console.log(aux_private_key.length);
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: process.env.CLIENT_EMAIL,
-      private_key: aux_private_key,
-    },
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-  
-  sheets = google.sheets({ version: "v4", auth });
-  console.log(sheets);
- 
-}
+const initAuth = async () => {
+  try {
+    const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
+    aux_private_key = resultado.data.private_key;
+    console.log(aux_private_key);
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.CLIENT_EMAIL,
+        private_key: aux_private_key,
+      },
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    sheets = google.sheets({ version: "v4", auth });
+  } catch (error) {
+    console.error('Error during initialization:', error);
+    process.exit(1); // exit the process with an error code
+  }
+};
 
 async function endpointGetSimpleEntity(entityName, req, res) {
   try {
@@ -45,7 +51,7 @@ async function endpointGetSimpleEntity(entityName, req, res) {
 }
 
 async function getSimpleEntity(entityName) {
-  console.log(sheets);
+  console.log({spreadsheetId})
   if (entityName == null)
     throw new Error("El nombre de la entidad no puede ser nulo.");
   return sheets.spreadsheets.values.get({
@@ -113,22 +119,20 @@ simpleEntityNames.forEach((miEntity) => {
 }, app);
 
 
-const getSecret = async ()=>{
-  const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
-  aux_private_key =  resultado.data.private_key;
-  console.log(aux_private_key);
-}
+// const getSecret = async ()=>{
+//   const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
+//   aux_private_key =  resultado.data.private_key;
+//   console.log(aux_private_key);
+// }
 
-getSecret().then(()=>{
-  initAuth();
-  console.log(sheets.spreadsheets);
-  
-  app.listen(process.env.PORT || port, async () => {
+const startServer = async () => {
+  await initAuth(); // wait for initialization to complete before starting the server
+  app.listen(process.env.PORT || port, () => {
     console.log(
       `Aplicación escuchando en http://localhost:${process.env.PORT || port}`
     );
-  
-  
   });
-});
+};
+
+startServer();
 
