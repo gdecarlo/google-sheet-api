@@ -21,8 +21,7 @@ let  sheets = null;
 const initAuth = async () => {
   try {
     const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
-    aux_private_key = resultado.data.private_key;
-    console.log(aux_private_key);
+    aux_private_key = resultado.data.private_key.split(String.raw`\n`).join('\n')
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -51,7 +50,7 @@ async function endpointGetSimpleEntity(entityName, req, res) {
 }
 
 async function getSimpleEntity(entityName) {
-  console.log({spreadsheetId})
+  console.log({aux_private_key})
   if (entityName == null)
     throw new Error("El nombre de la entidad no puede ser nulo.");
   return sheets.spreadsheets.values.get({
@@ -110,7 +109,7 @@ app.post("/persona", async (req, res) => {
   }
 });
 
-const simpleEntityNames = ["persona", "instrumento"];
+const simpleEntityNames = ["persona", "instrumento","personainstrumento"];
 
 simpleEntityNames.forEach((miEntity) => {
   app.get(`/${miEntity}`, async (req, res) => {
