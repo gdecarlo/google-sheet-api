@@ -19,6 +19,7 @@ let  sheets = null;
 
 
 function initAuth(){
+  console.log(aux_private_key.length);
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.CLIENT_EMAIL,
@@ -114,6 +115,7 @@ simpleEntityNames.forEach((miEntity) => {
 const getSecret = async ()=>{
   const resultado = await axios.get("https://www.mockachino.com/e9676bbe-755c-4b/secret");
   aux_private_key =  resultado.data.private_key;
+  console.log(aux_private_key);
 }
 
 app.listen(process.env.PORT || port, async () => {
