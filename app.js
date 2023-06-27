@@ -2,6 +2,10 @@ const express = require("express");
 const { google } = require("googleapis");
 const axios = require("axios");
 require("dotenv").config();
+const cors = require('cors');
+app.use(cors({
+    origin: '*'
+}));
 
 const app = express();
 const port = 5000;
